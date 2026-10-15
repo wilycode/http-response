@@ -1,0 +1,65 @@
+{
+    "name": "wilycode/http-response",
+    "description": "Typed PSR-7 response factory for HTML, JSON, redirects and empty responses.",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": "^8.4",
+        "psr/http-factory": "^1.1",
+        "psr/http-message": "^2.0 || ^1.1"
+    },
+    "require-dev": {
+        "nyholm/psr7": "^1.8",
+        "phpunit/phpunit": "^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "WilyCode\\Http\\Response\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "WilyCode\\Http\\Response\\Tests\\": "tests/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Simon Piter"
+        }
+    ],
+    "extra": {
+        "branch-alias": {
+            "dev-main": "0.1.x-dev"
+        }
+    },
+    "archive": {
+        "exclude": [
+            "/tests",
+            "/.github",
+            "/phpunit.xml.dist",
+            "/AGENTS.md",
+            "/CHANGELOG.md",
+            "/composer.lock",
+            "/.gitignore",
+            "/.gitattributes",
+            "/.phpunit.cache"
+        ]
+    },
+    "scripts": {
+        "test": "phpunit --configuration phpunit.xml.dist"
+    },
+    "keywords": [
+        "http",
+        "response",
+        "psr-7",
+        "psr-17",
+        "json",
+        "redirect",
+        "php"
+    ],
+    "homepage": "https://github.com/wilycode/http-response",
+    "support": {
+        "issues": "https://github.com/wilycode/http-response/issues",
+        "source": "https://github.com/wilycode/http-response"
+    }
+}
