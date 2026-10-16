@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace WilyCode\Http\Response\Tests;
 
+use InvalidArgumentException;
 use JsonException;
 use Nyholm\Psr7\Factory\Psr17Factory;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use WilyCode\Http\Response\HttpStatus;
 use WilyCode\Http\Response\ResponseFactory;
@@ -120,6 +122,77 @@ final class ResponseFactoryTest extends TestCase
         $response = $this->factory->empty(HttpStatus::NotModified);
 
         self::assertSame(304, $response->getStatusCode());
+        self::assertSame('', (string) $response->getBody());
+    }
+
+    #[DataProvider('bodylessStatuses')]
+    public function testJsonRejectsBodylessStatuses(HttpStatus $status): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('HTTP ' . $status->value);
+
+        $this->factory->json(['ok' => true], $status);
+    }
+
+    #[DataProvider('bodylessStatuses')]
+    public function testHtmlRejectsBodylessStatuses(HttpStatus $status): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('HTTP ' . $status->value);
+
+        $this->factory->html('<p>Unexpected body</p>', $status);
+    }
+
+    /** @return iterable<string, array{HttpStatus}> */
+    public static function bodylessStatuses(): iterable
+    {
+        yield '204 No Content' => [HttpStatus::NoContent];
+        yield '304 Not Modified' => [HttpStatus::NotModified];
+    }
+
+    #[DataProvider('redirectStatuses')]
+    public function testRedirectSupportsAllRedirectStatuses(HttpStatus $status): void
+    {
+        $response = $this->factory->redirect('/target', $status);
+
+        self::assertSame($status->value, $response->getStatusCode());
+        self::assertSame('/target', $response->getHeaderLine('Location'));
+        self::assertSame('', (string) $response->getBody());
+    }
+
+    /** @return iterable<string, array{HttpStatus}> */
+    public static function redirectStatuses(): iterable
+    {
+        yield '301 Moved Permanently' => [HttpStatus::MovedPermanently];
+        yield '302 Found' => [HttpStatus::Found];
+        yield '303 See Other' => [HttpStatus::SeeOther];
+        yield '307 Temporary Redirect' => [HttpStatus::TemporaryRedirect];
+        yield '308 Permanent Redirect' => [HttpStatus::PermanentRedirect];
+    }
+
+    #[DataProvider('nonRedirectStatuses')]
+    public function testRedirectRejectsNonRedirectStatuses(HttpStatus $status): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('HTTP ' . $status->value);
+
+        $this->factory->redirect('/target', $status);
+    }
+
+    /** @return iterable<string, array{HttpStatus}> */
+    public static function nonRedirectStatuses(): iterable
+    {
+        yield '200 OK' => [HttpStatus::Ok];
+        yield '204 No Content' => [HttpStatus::NoContent];
+        yield '304 Not Modified' => [HttpStatus::NotModified];
+        yield '404 Not Found' => [HttpStatus::NotFound];
+    }
+
+    public function testHtmlAllowsEmptyBodyForNormalStatus(): void
+    {
+        $response = $this->factory->html('', HttpStatus::Ok);
+
+        self::assertSame(200, $response->getStatusCode());
         self::assertSame('', (string) $response->getBody());
     }
 

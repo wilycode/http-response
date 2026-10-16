@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace WilyCode\Http\Response;
 
+use InvalidArgumentException;
 use JsonException;
 use Psr\Http\Message\ResponseInterface;
 
@@ -14,6 +15,7 @@ interface ResponseFactoryInterface
      * @param array<string, string|string[]> $headers
      *
      * @throws JsonException
+     * @throws InvalidArgumentException When the status does not allow a response body.
      */
     public function json(
         array $data,
@@ -21,14 +23,20 @@ interface ResponseFactoryInterface
         array $headers = [],
     ): ResponseInterface;
 
-    /** @param array<string, string|string[]> $headers */
+    /**
+     * @param array<string, string|string[]> $headers
+     * @throws InvalidArgumentException When the status does not allow a response body.
+     */
     public function html(
         string $html,
         HttpStatus $status = HttpStatus::Ok,
         array $headers = [],
     ): ResponseInterface;
 
-    /** @param array<string, string|string[]> $headers */
+    /**
+     * @param array<string, string|string[]> $headers
+     * @throws InvalidArgumentException When the status is not a redirect status.
+     */
     public function redirect(
         string $url,
         HttpStatus $status = HttpStatus::SeeOther,

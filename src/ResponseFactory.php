@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace WilyCode\Http\Response;
 
+use InvalidArgumentException;
 use Psr\Http\Message\ResponseFactoryInterface as PsrResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamFactoryInterface;
@@ -21,6 +22,8 @@ final readonly class ResponseFactory implements ResponseFactoryInterface
         HttpStatus $status = HttpStatus::Ok,
         array $headers = [],
     ): ResponseInterface {
+        $this->assertBodyAllowed($status);
+
         $body = json_encode(
             $data,
             JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES,
@@ -40,6 +43,8 @@ final readonly class ResponseFactory implements ResponseFactoryInterface
         HttpStatus $status = HttpStatus::Ok,
         array $headers = [],
     ): ResponseInterface {
+        $this->assertBodyAllowed($status);
+
         return $this->create(
             $html,
             $status,
@@ -54,6 +59,19 @@ final readonly class ResponseFactory implements ResponseFactoryInterface
         HttpStatus $status = HttpStatus::SeeOther,
         array $headers = [],
     ): ResponseInterface {
+        if (!in_array($status, [
+            HttpStatus::MovedPermanently,
+            HttpStatus::Found,
+            HttpStatus::SeeOther,
+            HttpStatus::TemporaryRedirect,
+            HttpStatus::PermanentRedirect,
+        ], true)) {
+            throw new InvalidArgumentException(sprintf(
+                'HTTP %d is not a redirect status.',
+                $status->value,
+            ));
+        }
+
         return $this->create(
             '',
             $status,
@@ -68,6 +86,16 @@ final readonly class ResponseFactory implements ResponseFactoryInterface
         array $headers = [],
     ): ResponseInterface {
         return $this->create('', $status, $headers);
+    }
+
+    private function assertBodyAllowed(HttpStatus $status): void
+    {
+        if ($status === HttpStatus::NoContent || $status === HttpStatus::NotModified) {
+            throw new InvalidArgumentException(sprintf(
+                'HTTP %d must not have a response body. Use empty() instead.',
+                $status->value,
+            ));
+        }
     }
 
     /** @param array<string, string|string[]> $headers */

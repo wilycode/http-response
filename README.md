@@ -80,6 +80,8 @@ $response = $responses->html(
 );
 ```
 
+`json()` and `html()` reject `204 No Content` and `304 Not Modified`, even when an empty string is passed to `html()`. Use `empty()` for bodyless responses. Invalid combinations throw `InvalidArgumentException`.
+
 Headers accept strings or lists of strings. User-provided headers are applied after defaults, so they override default header values (including differently cased names, as defined by PSR-7).
 
 ### Redirects
@@ -89,6 +91,8 @@ $response = $responses->redirect('/articles'); // 303 See Other
 $response = $responses->redirect('/articles', HttpStatus::Found); // 302 Found
 $response = $responses->redirect('/old', HttpStatus::MovedPermanently); // 301 Moved Permanently
 ```
+
+Only `301`, `302`, `303`, `307`, and `308` are accepted by `redirect()`. Other status codes raise `InvalidArgumentException`.
 
 The factory does **not** validate whether a redirect URL is safe for your application's authorization rules. Validate or restrict user-controlled destinations in your application to avoid open redirects.
 

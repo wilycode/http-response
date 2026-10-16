@@ -4,6 +4,15 @@ All notable changes to WilyCode HTTP Response are documented here.
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-16
+
+### Fixed
+
+- Reject `204 No Content` and `304 Not Modified` in `json()` and `html()`; use `empty()` for those statuses.
+- Accept only actual redirect statuses (`301`, `302`, `303`, `307`, `308`) in `redirect()`.
+- Add regression tests for invalid status/body combinations and all supported redirect statuses.
+
+
 ## [0.1.0] - 2026-10-16
 
 ### Added
